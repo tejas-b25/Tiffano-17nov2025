@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-COPY dist/erp-supermarket/browser /usr/share/nginx/html
+COPY dist/tiffino-frontend/browser /usr/share/nginx/html
 
 RUN chmod -R 755 /usr/share/nginx/html
 
