@@ -1,7 +1,9 @@
 version: "3.8"
 
 services:
-  # Database
+  # =========================
+  # MySQL Database
+  # =========================
   mysql-db:
     image: mysql:8.0
     container_name: erp-mysql-db
@@ -14,208 +16,231 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
-      - erp-network
+      - tiffino-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       timeout: 20s
       retries: 10
       interval: 10s
 
-# Eureka Service Registry
-eureka-server:
-  image: tejas2506/eureks-server:t1
-  container_name: eureka-server
-  ports:
-    - "8990:8990"
-  networks:
-    - tiffino-network
-  restart: on-failure
+  # =========================
+  # Eureka Server
+  # =========================
+  eureka-server:
+    image: tejas2506/eureka-server:t1
+    container_name: eureka-server
+    ports:
+      - "8990:8990"
+    networks:
+      - tiffino-network
+    restart: on-failure
 
+  # =========================
+  # API Gateway
+  # =========================
+  api-gateway:
+    image: tejas2506/api-gateway:t1
+    container_name: api-gateway
+    depends_on:
+      - eureka-server
+    ports:
+      - "8800:8800"
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# API Gateway
-api-gateway:
-  image: tejas2506/api-gateway:t1
-  container_name: api-gateway
-  depends_on:
-    - eureka-server
-  ports:
-    - "8800:8800"
-  networks:
-    - tiffino-network
-  restart: on-failure
+  # =========================
+  # delivery-service
+  # =========================
+  delivery-service:
+    image: tejas2506/delivery-service:t1
+    container_name: delivery-service
+    ports:
+      - "8970:8970"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/deliverydb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# delivery-service
-delivery-service:
-  image: tejas2506/delivery-service:t1
-  container_name: delivery-service
-  ports:
-    - "8970:8970"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/deliverydb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # loyalty-service
+  # =========================
+  loyalty-service:
+    image: tejas2506/loyalty-service:t1
+    container_name: loyalty-service
+    ports:
+      - "8940:8940"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/loyaltydb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# loyalty-service
-loyalty-service:
-  image: tejas2506/loyalty-service:t1
-  container_name: loyalty-service
-  ports:
-    - "8940:8940"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/loyaltydb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # menu-service
+  # =========================
+  menu-service:
+    image: tejas2506/menu-service:t1
+    container_name: menu-service
+    ports:
+      - "8920:8920"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/dummymenudb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# menu-service
-menu-service:
-  image: tejas2506/menu-service:t1
-  container_name: menu-service
-  ports:
-    - "8920:8920"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/dummymenudb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # notification-service
+  # =========================
+  notification-service:
+    image: tejas2506/notification-service:t1
+    container_name: notification-service
+    ports:
+      - "8980:8980"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/notificationdb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# notification-service
-notification-service:
-  image: tejas2506/notification-service:t1
-  container_name: notification-service
-  ports:
-    - "8980:8980"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/notificationdb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # order-service
+  # =========================
+  order-service:
+    image: tejas2506/order-service:t1
+    container_name: order-service
+    ports:
+      - "8910:8910"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/orderdb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# order-service
-order-service:
-  image: tejas2506/order-service:t1
-  container_name: order-service
-  ports:
-    - "8910:8910"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/orderdb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # payment-service
+  # =========================
+  payment-service:
+    image: tejas2506/payment-service:t1
+    container_name: payment-service
+    ports:
+      - "8930:8930"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/paymentdb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# payment-service
-payment-service:
-  image: tejas2506/payment-service:t1
-  container_name: payment-service
-  ports:
-    - "8930:8930"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/paymentdb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # review-service
+  # =========================
+  review-service:
+    image: tejas2506/review-service:t1
+    container_name: review-service
+    ports:
+      - "8950:8950"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/reviewdb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# review-service
-review-service:
-  image: tejas2506/review-service:t1
-  container_name: review-service
-  ports:
-    - "8950:8950"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/reviewdb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # subscription-service
+  # =========================
+  subscription-service:
+    image: tejas2506/subscription-service:t1
+    container_name: subscription-service
+    ports:
+      - "8960:8960"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/subscriptiondb?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# subscription-service
-subscription-service:
-  image: tejas2506/subscription-service:t1
-  container_name: subscription-service
-  ports:
-    - "8960:8960"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/subscriptiondb?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
+  # =========================
+  # userservice
+  # =========================
+  userservice:
+    image: tejas2506/userservice:t1
+    container_name: userservice
+    ports:
+      - "8890:8890"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/userdbfinal?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - tiffino-network
+    restart: on-failure
 
-# userservice
-userservice:
-  image: tejas2506/userservice:t1
-  container_name: userservice
-  ports:
-    - "8890:8890"
-  depends_on:
-    mysql-db:
-      condition: service_healthy
-    eureka-server:
-      condition: service_started
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/userdbfinal?createDatabaseIfNotExist=true
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-  networks:
-    - tiffion-network
-  restart: on-failure
-
-# Frontend
+  # =========================
+  # Frontend
+  # =========================
   frontend:
     image: tejas2506/tiffino-frontend:t1
     container_name: tiffino-frontend
@@ -224,13 +249,19 @@ userservice:
     depends_on:
       - api-gateway
     networks:
-      - tiffion-network
+      - tiffino-network
     restart: on-failure
 
+# =========================
+# Networks
+# =========================
 networks:
-  tiffion-network:
+  tiffino-network:
     driver: bridge
 
+# =========================
+# Volumes
+# =========================
 volumes:
   mysql-data:
     driver: local
