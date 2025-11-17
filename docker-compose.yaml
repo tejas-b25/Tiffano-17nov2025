@@ -23,7 +23,7 @@ services:
 
 # Eureka Service Registry
 eureka-server:
-  image: 
+  image: tejas2506/eureks-server:t1
   container_name: eureka-server
   ports:
     - "8990:8990"
@@ -34,7 +34,7 @@ eureka-server:
 
 # API Gateway
 api-gateway:
-  image: 
+  image: tejas2506/api-gateway:t1
   container_name: api-gateway
   depends_on:
     - eureka-server
@@ -46,7 +46,7 @@ api-gateway:
 
 # delivery-service
 delivery-service:
-  image: 
+  image: tejas2506/delivery-service:t1
   container_name: delivery-service
   ports:
     - "8970:8970"
@@ -65,7 +65,7 @@ delivery-service:
 
 # loyalty-service
 loyalty-service:
-  image: 
+  image: tejas2506/loyalty-service:t1
   container_name: loyalty-service
   ports:
     - "8940:8940"
@@ -84,7 +84,7 @@ loyalty-service:
 
 # menu-service
 menu-service:
-  image: 
+  image: tejas2506/menu-service:t1
   container_name: menu-service
   ports:
     - "8920:8920"
@@ -103,7 +103,7 @@ menu-service:
 
 # notification-service
 notification-service:
-  image: 
+  image: tejas2506/notification-service:t1
   container_name: notification-service
   ports:
     - "8980:8980"
@@ -122,7 +122,7 @@ notification-service:
 
 # order-service
 order-service:
-  image: 
+  image: tejas2506/order-service:t1
   container_name: order-service
   ports:
     - "8910:8910"
@@ -141,7 +141,7 @@ order-service:
 
 # payment-service
 payment-service:
-  image: 
+  image: tejas2506/payment-service:t1
   container_name: payment-service
   ports:
     - "8930:8930"
@@ -160,7 +160,7 @@ payment-service:
 
 # review-service
 review-service:
-  image: 
+  image: tejas2506/review-service:t1
   container_name: review-service
   ports:
     - "8950:8950"
@@ -179,7 +179,7 @@ review-service:
 
 # subscription-service
 subscription-service:
-  image: 
+  image: tejas2506/subscription-service:t1
   container_name: subscription-service
   ports:
     - "8960:8960"
@@ -198,7 +198,7 @@ subscription-service:
 
 # userservice
 userservice:
-  image: 
+  image: tejas2506/userservice:t1
   container_name: userservice
   ports:
     - "8890:8890"
@@ -217,7 +217,7 @@ userservice:
 
 # Frontend
   frontend:
-    image: 
+    image: tejas2506/tiffino-frontend:t1
     container_name: tiffino-frontend
     ports:
       - "80:80"
