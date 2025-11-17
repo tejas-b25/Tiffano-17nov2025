@@ -1,5 +1,5 @@
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
-COPY target/User_Authentication_And_Role_Management-0.0.1-SNAPSHOT.jar app.jar
+COPY target/review-service-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8950
 ENTRYPOINT ["java", "-jar", "app.jar"]
